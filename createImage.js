@@ -19,7 +19,7 @@ fs.mkdirSync("./test/" + Name);
 async function createImage(width, height, callback, i) {
 	console.log(`Drawing image ${Name} ${i}`);
 	if (i <= 0) {
-		return callback();
+		return callback(Name);
 	}
 	echo -= alpha * (1 / echo);
 	techo -= alpha * (1 / techo);
@@ -58,7 +58,7 @@ async function createImage(width, height, callback, i) {
 	fs.writeFileSync("./test/" + Name + `/${Name}_${i}.png`, buffer);
 
 	i = i - 1;
-	createImage(7680, 4320, callback, i);
+	createImage(width, height, callback, i);
 
 	function getVectorHex(vector) {
 		return "#" + Math.floor(getValueFromAngle(vector.getAngle() + colorSeed) * 16777215).toString(16);

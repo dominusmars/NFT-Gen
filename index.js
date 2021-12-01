@@ -1,20 +1,32 @@
 var argv = require("minimist")(process.argv.slice(2));
 const fs = require("fs");
-
+const gifLength = 30;
+const childProcesses = 5;
+const width = 1080
+const height = 1297;
 if (process.argv[2] == "child") {
 	var i = process.argv[3];
 	var then = Date.now();
-	require("./createImage")(7680, 4320, callback, 30);
-	function callback() {
-		var now = Date.now();
-		var date = (now - then) / 1000;
-		console.log("done in " + date + "seconds");
+	require("./createImage")(width, height, callback, gifLength);
+	function callback(path) {
+		var dir = "./test/" + path
+		var files = fs.readdirSync(dir)
+		if (files.length != gifLength) {
+			fs.unlinkSync(dir)
+			console.log("Error: Images not complete for " + path);
+
+		} else {
+			var now = Date.now();
+			var date = (now - then) / 1000;
+			console.log("done in " + date + "seconds");
+		}
+
 	}
 } else {
-	console.log(process.argv);
+	console.log("Starting Processes");
 	const cp = require("child_process");
 
-	for (var i = 0; i < 30; i++) {
+	for (var i = 0; i < childProcesses; i++) {
 		startChild(i);
 	}
 	function startChild(i) {
