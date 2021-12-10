@@ -16,6 +16,22 @@ const scale = 2000 * Math.random() + 500;
 const offset = 200 * Math.random() + 1;
 const Name = randomString();
 fs.mkdirSync("./test/" + Name);
+var constants = {
+	alpha: alpha,
+	beta: beta,
+	theta: theta,
+	deta: deta,
+	charle: charle,
+	echo: echo,
+	techo: techo,
+	seed: seed,
+	colorSeed: colorSeed,
+	size: size,
+	scale: scale,
+	offset: offset,
+	name: Name,
+};
+fs.writeFileSync("./test/" + Name + "/constants.json", JSON.stringify(constants));
 async function createImage(width, height, callback, i) {
 	console.log(`Drawing image ${Name} ${i}`);
 	if (i <= 0) {
@@ -80,7 +96,7 @@ function getValueFromAngle(angle) {
 	return Math.sin(angle);
 }
 function randomAngle() {
-	return Math.random() * (Math.PI / 2);
+	return Math.random() * (Math.PI / 3);
 }
 function randomNumber(x, y) {
 	return Math.random() * (y - x) + x;
