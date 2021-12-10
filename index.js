@@ -1,7 +1,7 @@
 var argv = require("minimist")(process.argv.slice(2));
 const fs = require("fs");
 const gifLength = 30;
-const childProcesses = 100;
+const childProcesses = 1;
 const width = 1080;
 const height = 1297;
 if (process.argv[2] == "child") {
@@ -11,9 +11,12 @@ if (process.argv[2] == "child") {
 	function callback(path) {
 		var dir = "./test/" + path;
 		var files = fs.readdirSync(dir);
-		if (files.length != gifLength + 1) {
-			fs.unlinkSync(dir);
-			console.log("Error: Images not complete for " + path);
+		if (files.length != (gifLength * 2) + 2) {
+			try {
+				fs.unlinkSync(dir);
+			} catch (error) {
+				console.log("Error: Images not complete for " + path);
+			}
 		} else {
 			var now = Date.now();
 			var date = (now - then) / 1000;

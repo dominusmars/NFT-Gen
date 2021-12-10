@@ -1,7 +1,6 @@
 const { createCanvas, loadImage } = require("canvas");
 const Vector = require("./vector");
 const fs = require("fs");
-// var argv = require("minimist")(process.argv.slice(2));
 var alpha = randomNumber(1, 10);
 var beta = randomNumber(1, 10);
 var theta = randomNumber(10, 60);
@@ -16,6 +15,9 @@ const scale = 2000 * Math.random() + 500;
 const offset = 200 * Math.random() + 1;
 const Name = randomString();
 fs.mkdirSync("./test/" + Name);
+const GIFEncoder = require('gifencoder');
+
+
 var constants = {
 	alpha: alpha,
 	beta: beta,
@@ -32,14 +34,36 @@ var constants = {
 	name: Name,
 };
 fs.writeFileSync("./test/" + Name + "/constants.json", JSON.stringify(constants));
+const encoder = new GIFEncoder(1080, 1297);
+const pngFileStream = require('png-file-stream');
+encoder.createReadStream().pipe(fs.createWriteStream('./test/' + Name + '/aFinalImage.gif'));
+
+encoder.start();
+encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
+encoder.setDelay(30);  // frame delay in ms
+encoder.setQuality(10);
+var stepTwo = false;
+var val = 0;
 async function createImage(width, height, callback, i) {
 	console.log(`Drawing image ${Name} ${i}`);
 	if (i <= 0) {
+		stepTwo = true;
+	}
+	if (stepTwo && i >= val) {
+		encoder.finish();
 		return callback(Name);
 	}
-	echo -= alpha * (1 / echo);
-	techo -= alpha * (1 / techo);
-	charle -= alpha * (1 / charle);
+	if (!stepTwo) {
+		val = val + 1;
+		echo -= alpha * (1 / echo);
+		techo -= alpha * (1 / techo);
+		charle -= alpha * (1 / charle);
+	} else {
+		echo += alpha * (1 / echo);
+		techo += alpha * (1 / techo);
+		charle += alpha * (1 / charle);
+	}
+
 
 	const canvas = createCanvas(width, height);
 	const context = canvas.getContext("2d");
@@ -69,11 +93,17 @@ async function createImage(width, height, callback, i) {
 	}
 
 	createFractial();
+	encoder.addFrame(context);
 	const buffer = canvas.toBuffer("image/png");
 	// pictures.push(buffer);
 	fs.writeFileSync("./test/" + Name + `/${Name}_${i}.png`, buffer);
+	if (stepTwo) {
+		i = i + 1;
+	}
+	else {
+		i = i - 1;
 
-	i = i - 1;
+	}
 	createImage(width, height, callback, i);
 
 	function getVectorHex(vector) {
