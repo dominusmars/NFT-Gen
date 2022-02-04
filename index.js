@@ -1,27 +1,25 @@
 var argv = require("minimist")(process.argv.slice(2));
 const fs = require("fs");
-const gifLength = 30;
-const childProcesses = 16;
-const width = 1080;
-const height = 1297;
+const gifLength = 50;
+const childProcesses = 10;
+const NeededGIFS = 100;
+var currentDoneGIFS = 0;
+
+
 if (process.argv[2] == "child") {
 	var i = process.argv[3];
 	var then = Date.now();
-	require("./createImage")(width, height, callback, gifLength);
-	function callback(path) {
-		var dir = "./test/" + path;
-		var files = fs.readdirSync(dir);
-		if (files.length != gifLength + 2) {
-			try {
-				fs.unlinkSync(dir);
-			} catch (error) {
-				console.log("Error: Images not complete for " + path);
+	require("./modules/createImage")(callback, gifLength);
+	function callback(bools) {
+			if(!bools){
+				process.send("failed");
+			}else{
+				var now = Date.now();
+				var date = (now - then) / 1000;
+				console.log("done in " + date + "seconds");
+				process.send("done")
 			}
-		} else {
-			var now = Date.now();
-			var date = (now - then) / 1000;
-			console.log("done in " + date + "seconds");
-		}
+			
 	}
 } else {
 	console.log("Starting Processes");
@@ -31,12 +29,26 @@ if (process.argv[2] == "child") {
 		startChild(i);
 	}
 	function startChild(i) {
-		console.log("hello!");
+		console.log("Starting  Gif!");
 		var child = cp.fork(__filename, ["child", i], {
 			stdio: ["inherit", "inherit", "inherit", "ipc"],
 		});
 		child.on("error", (e) => {
 			console.log(e);
 		});
+		child.on("message", (m)=>{
+			console.log(m)
+			if(m == "done"){
+				currentDoneGIFS++;
+				console.log("count: ", currentDoneGIFS);
+				console.log("needed: ", NeededGIFS);
+
+				if(currentDoneGIFS < NeededGIFS){
+					startChild(i)
+				}
+			}else{
+				startChild(i)
+			}
+		})
 	}
 }
